@@ -1,0 +1,55 @@
+<FrameLayout android:id="@+id/baseLayout"
+			 xmlns:android="http://schemas.android.com/apk/res/android"
+			 xmlns:tools="http://schemas.android.com/tools"
+			 android:layout_width="match_parent"
+			 android:layout_height="match_parent"
+			 android:background="@android:color/background_dark" tools:context="com.twp.project.eml.AutoLaunch">
+
+	<!-- The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc. -->
+
+	<!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+
+	<TextView
+		android:id="@+id/countDown"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_gravity="center_horizontal|bottom" android:textColor="@android:color/background_light"/>
+
+	<LinearLayout
+		android:id="@+id/timeLayout"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_gravity="center" android:orientation="vertical">
+
+		<DigitalClock
+			android:id="@+id/timeDisplay"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:layout_gravity="center" android:enabled="true" android:textColor="@android:color/background_light" android:textSize="@dimen/abc_action_button_min_height_material"/>
+
+		<TextView
+			android:id="@+id/dayText"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center" android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="@android:color/background_light" android:textSize="@dimen/abc_text_size_medium_material"/>
+
+	</LinearLayout>
+
+	<ImageButton
+		android:id="@+id/settingsBtn"
+		style="?android:attr/buttonStyleSmall"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_gravity="end|bottom" android:background="@android:color/background_dark"/>
+
+	<ProgressBar
+		android:id="@+id/batteryBar"
+		style="@android:style/Widget.ProgressBar.Horizontal"
+		android:layout_width="50dp"
+		android:layout_height="24dp" android:layout_gravity="end|top" android:max="100" android:progress="50"/>
+
+	<TextView
+		android:id="@+id/batteryPercent"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_gravity="end|top" android:layout_marginRight="8dp" android:text="50%" android:textColor="@android:color/background_light" android:typeface="monospace"/>
+
+</FrameLayout>
