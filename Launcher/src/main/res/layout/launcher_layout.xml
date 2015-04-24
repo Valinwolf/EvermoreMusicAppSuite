@@ -3,7 +3,7 @@
 			 xmlns:tools="http://schemas.android.com/tools"
 			 android:layout_width="match_parent"
 			 android:layout_height="match_parent"
-			 android:background="@android:color/background_dark" tools:context="com.twp.project.eml.AutoLaunch">
+			 android:background="@android:color/background_dark" tools:context="com.twp.project.em.L">
 
 	<!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,

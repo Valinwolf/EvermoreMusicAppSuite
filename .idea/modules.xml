@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/EvermoreMusicLauncher.iml" filepath="$PROJECT_DIR$/EvermoreMusicLauncher.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/EvermoreMusicAppSuite.iml" filepath="$PROJECT_DIR$/EvermoreMusicAppSuite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Launcher/Launcher.iml" filepath="$PROJECT_DIR$/Launcher/Launcher.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Settings/Settings.iml" filepath="$PROJECT_DIR$/Settings/Settings.iml" />
     </modules>
   </component>
 </project>

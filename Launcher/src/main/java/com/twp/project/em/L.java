@@ -1,13 +1,13 @@
-package com.twp.project.eml;
+package com.twp.project.em;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.View;
 import android.widget.DigitalClock;
 import android.widget.FrameLayout;
@@ -16,19 +16,29 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.twp.project.eml.R;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
-public class AutoLaunch extends Activity
+public class L extends Activity
 {
-	public static ProgressBar batteryBar;
-	public static TextView batteryPercent;
-	ColorStateList hi = new ColorStateList(new int[][]{new int[]{android.R.attr.state_pressed}, new int[]{android.R.attr.state_focused}, new int[]{}}, new int[]{Color.rgb(0, 190, 0), Color.rgb(255, 190, 0), Color.rgb(0, 150, 0)});
-	ColorStateList mi = new ColorStateList(new int[][]{new int[]{android.R.attr.state_pressed}, new int[]{android.R.attr.state_focused}, new int[]{}}, new int[]{Color.rgb(255, 190, 0), Color.rgb(255, 190, 0), Color.rgb(255, 150, 0)});
-	ColorStateList lo = new ColorStateList(new int[][]{new int[]{android.R.attr.state_pressed}, new int[]{android.R.attr.state_focused}, new int[]{}}, new int[]{Color.rgb(250, 0, 0), Color.rgb(250, 190, 0), Color.rgb(180, 0, 0)});
+	// Views
+	private static ProgressBar batteryBar;
+	private static TextView batteryPercent;
+	private TextView clockTextView;
+	private TextView dayTextView;
+	private TextView countDownView;
+	private ImageButton settingsBtnView;
+	private FrameLayout baseLayout;
+	private LinearLayout timeLayout;
+
+	// Multi-line variables
 	CountDownTimer countDown = new CountDownTimer(5000, 1000)
 	{
 		@Override public void onTick(long millisUntilFinished)
@@ -37,33 +47,25 @@ public class AutoLaunch extends Activity
 			countDownView.setText("Returning in " + count + "...");
 			try
 			{
-				File battery = new File("/sys/class/power_supply/battery/capacity");
-				BufferedReader br = new BufferedReader(new FileReader(battery));
-				int percent = Integer.parseInt(br.readLine());
+				int percent = battery();
 				batteryBar.setProgress(percent);
+				batteryPercent.setTextColor(battery_color(percent));
 				batteryPercent.setText(percent + "%");
-				if(percent <= 100)
-				{
-					batteryPercent.setTextColor(hi);
-				}
-				else if(percent <= 50)
-				{
-					batteryPercent.setTextColor(mi);
-				}
-				else if(percent <= 25)
-				{
-					batteryPercent.setTextColor(lo);
-				}
-				else
-				{
-					batteryPercent.setTextColor(lo);
-					batteryPercent.setText("ERR 2");
-				}
+			}
+			catch(IOException ex)
+			{
+				batteryPercent.setText("ERR 1");
+				Log.e(V.EM_TAG_BATT, "FAILED TO READ BATTERY FILE!", ex);
+			}
+			catch(IndexOutOfBoundsException ex)
+			{
+				batteryPercent.setText("ERR 2");
+				Log.e(V.EM_TAG_BATT, "BATTERY FILE HAS AN INVALID VALUE!", ex);
 			}
 			catch(Exception ex)
 			{
-				batteryPercent.setTextColor(lo);
-				batteryPercent.setText("ERR 1");
+				batteryPercent.setText("ERR 3");
+				Log.e(V.EM_TAG_BATT, "UNKNOWN ERROR!", ex);
 			}
 		}
 
@@ -73,26 +75,21 @@ public class AutoLaunch extends Activity
 			apollo();
 		}
 	};
-	private TextView clockTextView;
-	private TextView dayTextView;
-	private TextView countDownView;
-	private ImageButton settingsBtnView;
-	private FrameLayout baseLayout;
-	private LinearLayout timeLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		if(SystemClock.elapsedRealtime() <= 45000)
+		if(SystemClock.elapsedRealtime() <= V.EM_BOOT_TIME)
 		{
 			apollo();
 		}
 		else
 		{
-			setContentView(R.layout.activity_auto_launch);
+			setContentView(R.layout.launcher_layout);
 			Resources res = getResources();
 
+			// Set view variables
 			clockTextView = (DigitalClock) findViewById(R.id.timeDisplay);
 			dayTextView = (TextView) findViewById(R.id.dayText);
 			countDownView = (TextView) findViewById(R.id.countDown);
@@ -102,22 +99,24 @@ public class AutoLaunch extends Activity
 			batteryBar = (ProgressBar) findViewById(R.id.batteryBar);
 			batteryPercent = (TextView) findViewById(R.id.batteryPercent);
 
+			// Set Settings button image and on-click listener
 			settingsBtnView.setImageDrawable(res.getDrawable(R.mipmap.settings_icon));
 			settingsBtnView.setOnClickListener(new View.OnClickListener()
 			{
 				@Override public void onClick(View v)
 				{
-					Intent settingsLauncher = new Intent(android.provider.Settings.ACTION_SETTINGS);
-					startActivity(settingsLauncher);
+					settings();
 					countDown.cancel();
 				}
 			});
 
+			// Get current date and set dayTextView text
 			Calendar cal = Calendar.getInstance();
-			SimpleDateFormat df = new SimpleDateFormat("EEEEE, d MMMMM yyyy");
+			SimpleDateFormat df = new SimpleDateFormat("EEEEE, d MMMMM yyyy", Locale.US);
 			String date = df.format(cal.getTime());
 			dayTextView.setText(date);
 
+			// Return to Apollo click listeners
 			View.OnClickListener clickReturn = new View.OnClickListener()
 			{
 				@Override public void onClick(View v)
@@ -137,10 +136,12 @@ public class AutoLaunch extends Activity
 	protected void onResume()
 	{
 		super.onResume();
-		if(SystemClock.elapsedRealtime() > 45000)
+		if(SystemClock.elapsedRealtime() > V.EM_BOOT_TIME)
 		{
 			countDown.cancel();
 			countDown.start();
+			// Force reload the time
+			clockTextView.invalidate();
 		}
 	}
 
@@ -148,8 +149,44 @@ public class AutoLaunch extends Activity
 	{
 		Intent apolloLauncher = new Intent();
 		apolloLauncher.addCategory(Intent.CATEGORY_LAUNCHER);
-		apolloLauncher.setPackage("com.andrew.apollo");
+		apolloLauncher.setPackage(V.EM_PACKAGE_APOLLO);
 		apolloLauncher.setAction(Intent.ACTION_MAIN);
 		startActivity(apolloLauncher);
+	}
+
+	public void settings()
+	{
+		Intent settingsLauncher = new Intent();
+		settingsLauncher.addCategory(Intent.CATEGORY_LAUNCHER);
+		settingsLauncher.setPackage(V.EM_PACKAGE_SETTINGS);
+		settingsLauncher.setAction(Intent.ACTION_MAIN);
+		startActivity(settingsLauncher);
+	}
+
+	public int battery() throws IOException
+	{
+		File battery = new File("/sys/class/power_supply/battery/capacity");
+		BufferedReader br = new BufferedReader(new FileReader(battery));
+		return Integer.parseInt(br.readLine());
+	}
+
+	public ColorStateList battery_color(int percent) throws IndexOutOfBoundsException
+	{
+		if(percent <= 100)
+		{
+			return V.EM_COLORLIST_GREEN;
+		}
+		else if(percent <= 50)
+		{
+			return V.EM_COLORLIST_ORANGE;
+		}
+		else if(percent <= 25)
+		{
+			return V.EM_COLORLIST_RED;
+		}
+		else
+		{
+			throw new IndexOutOfBoundsException(percent+" IS NOT A VALID PERCENTAGE!");
+		}
 	}
 }
